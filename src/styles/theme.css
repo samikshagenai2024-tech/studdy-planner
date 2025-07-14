@@ -1,0 +1,16 @@
+:root {
+    --primary-blue: #4d73ff;
+    --light-blue: #b8c9ff;
+    --cream: #f9f9f9;
+    --text-color: #333333;
+    --border-color: #d9d9d9;
+    --hover-blue: #3c5ce0;
+  }
+  
+  body {
+    margin: 0;
+    background: var(--cream);
+    font-family: 'Segoe UI', sans-serif;
+    color: var(--text-color);
+  }
+  
