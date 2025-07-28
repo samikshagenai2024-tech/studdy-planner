@@ -1,17 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { db } from '../firebase';
-
-import {
-  addDoc,
-  collection,
-  getDocs,
-  deleteDoc,
-  doc,
-  updateDoc,
-  query,
-  where,
-} from 'firebase/firestore';
- 
+import axios from 'axios'; // Axios for API calls
 
 const TaskForm = ({ selectedDate }) => {
   const [title, setTitle] = useState('');
@@ -24,10 +12,8 @@ const TaskForm = ({ selectedDate }) => {
     setLoading(true);
     try {
       const dateStr = selectedDate.toISOString().split('T')[0];
-      const q = query(collection(db, 'tasks'), where('date', '==', dateStr));
-      const snapshot = await getDocs(q);
-      const taskList = snapshot.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
-      setTasks(taskList);
+      const res = await axios.get(`http://localhost:5000/tasks?date=${dateStr}`);
+      setTasks(res.data);
     } catch (error) {
       console.error('Error fetching tasks:', error);
     }
@@ -42,11 +28,12 @@ const TaskForm = ({ selectedDate }) => {
     e.preventDefault();
     if (!title.trim()) return;
     try {
-      await addDoc(collection(db, 'tasks'), {
+      const newTask = {
         title: title.trim(),
         date: selectedDate.toISOString().split('T')[0],
         completed: false,
-      });
+      };
+      await axios.post('http://localhost:5000/tasks', newTask);
       setTitle('');
       fetchTasks();
     } catch (error) {
@@ -58,7 +45,7 @@ const TaskForm = ({ selectedDate }) => {
     const confirmDelete = window.confirm("Are you sure you want to remove this task?");
     if (!confirmDelete) return;
     try {
-      await deleteDoc(doc(db, 'tasks', id));
+      await axios.delete(`http://localhost:5000/tasks/${id}`);
       fetchTasks();
     } catch (error) {
       console.error('Error deleting task:', error);
@@ -67,8 +54,9 @@ const TaskForm = ({ selectedDate }) => {
 
   const toggleComplete = async (task) => {
     try {
-      const ref = doc(db, 'tasks', task.id);
-      await updateDoc(ref, { completed: !task.completed });
+      await axios.put(`http://localhost:5000/tasks/${task.id}`, {
+        completed: !task.completed,
+      });
       fetchTasks();
     } catch (error) {
       console.error('Error updating completion status:', error);
@@ -77,7 +65,9 @@ const TaskForm = ({ selectedDate }) => {
 
   const handleEditSave = async (id) => {
     try {
-      await updateDoc(doc(db, 'tasks', id), { title: editTitle });
+      await axios.put(`http://localhost:5000/tasks/${id}`, {
+        title: editTitle,
+      });
       setEditingId(null);
       setEditTitle('');
       fetchTasks();
