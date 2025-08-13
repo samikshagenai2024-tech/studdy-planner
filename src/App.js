@@ -64,10 +64,9 @@ function App() {
             </div>
             <nav>
               <ul>
-                <li>Dashboard</li>
+               
                 <li className="active">Study Plan</li>
-                <li>Messages</li>
-                <li>Settings</li>
+              
               </ul>
             </nav>
           </div>
